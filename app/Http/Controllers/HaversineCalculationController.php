@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\LocationsExport;
 use App\Http\DTO\CSVDataDTO;
 use App\Http\DTO\PositionStackDTO;
 use FilippoToso\PositionStack\Facade\PositionStack;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Mockery\Exception;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class HaversineCalculationController extends Controller
 {
@@ -15,7 +17,7 @@ final class HaversineCalculationController extends Controller
     const EARTH_RADIUS_MILES = 0;
 
     // @TODO remove this later
-    public function distance(): View
+    public function distance(): StreamedResponse
     {
         $unit = 'KM';
 
@@ -23,12 +25,12 @@ final class HaversineCalculationController extends Controller
             "Sint Janssingel 92, 5211 DA 's-Hertogenbosch, The Netherlands",
             "Deldenerstraat 70, 7551AH Hengelo, The Netherlands",
             "46/1 Office no 1 Ground Floor , Dada House , Inside dada silk mills compound, Udhana Main Rd, near Chhaydo Hospital, Surat, 394210, India",
-            "Weena 505, 3013 AL Rotterdam, The Netherlands",
+            "Weena 505, 3013AL Rotterdam, The Netherlands",
             "221B Baker St., London, United Kingdom",
             "1600 Pennsylvania Avenue, Washington, D.C., USA",
             "350 Fifth Avenue, New York City, NY 10118",
             "Saint Martha House, 00120 Citta del Vaticano, Vatican City",
-            "5225 Figueroa Mountain Road, Los Olivos, Calif. 93441, USA"
+            "5225 Figueroa Mountain Road, Los Olivos, California 93441, USA"
         ];
 
         /*
@@ -36,9 +38,12 @@ final class HaversineCalculationController extends Controller
          */
 
         $locations = $this->getLocations($data);
-        $csvData = $this->getSortedCSVData($this->getHeadquarters($locations), $locations);
+        $headquarters = $this->getHeadquarters($locations);
+        $csvData = $this->getSortedCSVData($headquarters, $locations);
 
-        dd($csvData);
+        return (new LocationsExport($csvData))->download();
+
+        //dd($csvData);
 
         $distance = $this->haversine($pointA, $pointB);
 
@@ -128,8 +133,6 @@ final class HaversineCalculationController extends Controller
         {
             $temp []= CSVDataDTO::from([$this->haversine($headquarters, $location), $location->name, $location->label]);
         }
-
-        dd($temp);
 
         sort($temp);
 
