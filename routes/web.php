@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HaversineController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,8 +14,4 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/distance', [\App\Http\Controllers\HaversineCalculationController::class, 'distance'])->name('distance');
+Route::get('/', [HaversineController::class, 'distance'])->name('distance');

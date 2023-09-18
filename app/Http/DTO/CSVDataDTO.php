@@ -6,7 +6,8 @@ use Spatie\LaravelData\Data;
 
 final class CSVDataDTO extends Data
 {
-    public float $distance;
+    public ?string $sortNumber;
+    public string $distance;
     public string $name;
     public string $address;
 }
